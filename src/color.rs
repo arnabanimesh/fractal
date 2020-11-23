@@ -19,7 +19,7 @@ pub fn hsl_to_rgb(h: f64, s: f64, l: f64) -> (u8, u8, u8) {
 		b = hue_to_rgb(p, q, h - 1.0 / 3.0);
 	}
 
-	return ((r * 255.) as u8, (g * 255.) as u8, (b * 255.) as u8);
+	((r * 255.) as u8, (g * 255.) as u8, (b * 255.) as u8)
 }
 
 fn hue_to_rgb(p: f64, q: f64, mut t: f64) -> f64 {
@@ -38,5 +38,5 @@ fn hue_to_rgb(p: f64, q: f64, mut t: f64) -> f64 {
 		return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
 	}
 
-	return p;
+	p
 }
