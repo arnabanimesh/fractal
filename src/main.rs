@@ -6,18 +6,18 @@ use tokio::sync::mpsc;
 
 const WIDTH: u32 = 1024;
 const HEIGHT: u32 = 1024;
-const BUF_SIZE: u32 = WIDTH * HEIGHT * 3;
+const BUF_SIZE: usize = (WIDTH * HEIGHT * 3) as usize;
 const NB_SAMPLES: u32 = 50;
 const SIZE: f64 = 0.000000001;
 const MAX_ITER: u32 = 1000;
+const LINE_SIZE: usize = WIDTH as usize * 3;
 
 #[tokio::main]
 async fn main() {
     let blocking_task = tokio::spawn(async {
         let px: f64 = -0.5557506;
         let py: f64 = -0.55560;
-        let mut buf: Vec<u8> = Vec::with_capacity(BUF_SIZE as usize);
-        buf.resize(BUF_SIZE as usize, 0);
+        let mut buf = vec![0_u8; BUF_SIZE];
 
         let (tx, mut rx) = mpsc::channel(100);
 
@@ -31,10 +31,9 @@ async fn main() {
 
         drop(tx);
 
-        let mut finished: f64 = 0.;
+        let mut percentage_finished: f64 = 0.;
         while let Some(res) = rx.recv().await {
-            finished += 1.;
-            let percentage_finished = (finished / (HEIGHT as f64)) * 100.;
+            percentage_finished += 100. / (HEIGHT as f64);
             print!("Progress: {}%\r", percentage_finished as u32);
 
             let (line, line_number) = res;
@@ -57,8 +56,7 @@ fn write_line(buf: &mut Vec<u8>, line: &Vec<u8>, line_number: u32) {
 fn render_line(line_number: u32, px: f64, py: f64) -> (Vec<u8>, u32) {
     let mut rng = thread_rng();
 
-    let line_size = WIDTH * 3;
-    let mut line: Vec<u8> = vec![0; line_size as usize];
+    let mut line = vec![0_u8; LINE_SIZE];
 
     for x in 0..WIDTH {
         let sampled_colours = (0..NB_SAMPLES)
